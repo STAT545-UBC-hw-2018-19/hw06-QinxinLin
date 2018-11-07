@@ -535,11 +535,11 @@ index <- sample(n,n/2)
     ## # A tibble: 6 x 6
     ##   country continent  year lifeExp        pop gdpPercap
     ##   <fct>   <fct>     <int>   <dbl>      <int>     <dbl>
-    ## 1 China   Asia       1977    64.0  943455000      741.
-    ## 2 China   Asia       1962    44.5  665770000      488.
-    ## 3 China   Asia       1997    70.4 1230075000     2289.
-    ## 4 China   Asia       1957    50.5  637408000      576.
-    ## 5 China   Asia       1992    68.7 1164970000     1656.
+    ## 1 China   Asia       1967    58.4  754550000      613.
+    ## 2 China   Asia       1972    63.1  862030000      677.
+    ## 3 China   Asia       1987    67.3 1084035000     1379.
+    ## 4 China   Asia       1952    44    556263527      400.
+    ## 5 China   Asia       1997    70.4 1230075000     2289.
     ## 6 China   Asia       2007    73.0 1318683096     4959.
 
 ``` r
@@ -549,11 +549,11 @@ index <- sample(n,n/2)
     ## # A tibble: 6 x 6
     ##   country continent  year lifeExp        pop gdpPercap
     ##   <fct>   <fct>     <int>   <dbl>      <int>     <dbl>
-    ## 1 China   Asia       1952    44    556263527      400.
-    ## 2 China   Asia       1967    58.4  754550000      613.
-    ## 3 China   Asia       1972    63.1  862030000      677.
+    ## 1 China   Asia       1957    50.5  637408000      576.
+    ## 2 China   Asia       1962    44.5  665770000      488.
+    ## 3 China   Asia       1977    64.0  943455000      741.
     ## 4 China   Asia       1982    65.5 1000281000      962.
-    ## 5 China   Asia       1987    67.3 1084035000     1379.
+    ## 5 China   Asia       1992    68.7 1164970000     1656.
     ## 6 China   Asia       2002    72.0 1280400000     3119.
 
 Then I will fit a linear model to the training set and then compute mspe
@@ -578,7 +578,7 @@ linear_model(data_training,data_test)
 ```
 
     ## (Intercept)        year        mspe        mape 
-    ##  48.3601767   0.5344396  19.6647235   3.2929824
+    ##  45.2110254   0.5874658  13.8220974   3.1684957
 
 Next I will fit a quadratic model to the training set and then compute
 mspe and mape on the test set.
@@ -602,8 +602,8 @@ quadratic_model<-function(training,test,offset = 1952){
 quadratic_model(data_training,data_test)
 ```
 
-    ## (Intercept)     I(year)   I(year^2)        mspe        mape 
-    ## 44.60347404  1.03533328 -0.01001787 15.89111458  2.37149156
+    ##  (Intercept)      I(year)    I(year^2)         mspe         mape 
+    ## 41.483611417  1.012627440 -0.007941109  6.612203022  1.897841730
 
 Finally, I will fit a robust model to the training set and then compute
 mspe and mape on the test set.
@@ -627,7 +627,7 @@ robust_model(data_training,data_test)
 ```
 
     ## (Intercept)        year        mspe        mape 
-    ##  48.3601767   0.5344396  19.6647235   3.2929824
+    ##  46.7061190   0.5514394  11.2164346   2.9883639
 
 We can find that quadratic regression has smallest mspe and mape. Linear
 regression and robust regression have similar intercept, slope, mspe and
