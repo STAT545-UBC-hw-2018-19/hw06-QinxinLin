@@ -419,6 +419,26 @@ robust<-function(data){
   spread(key = term,value = estimate))
 ```
 
+**Summary of intercept and slope parameters**
+
+```{r}
+#summary
+unnest%>%
+  dplyr::select(intercept_robust,slope_robust)%>%
+  summary()
+#density plot of intercept 
+ggplot(unnest)+
+  geom_density(aes(x=intercept_robust))+
+  labs(title="density plot of intercept",
+       x = "intercept")
+#density plot of slope
+ggplot(unnest)+
+  geom_density(aes(x=slope_robust))+
+  labs(title="density plot of slope",
+       x = "slope")
+```
+
+
 **Fit a linear model of life expectancy against year**
 
 ```{r}
@@ -443,14 +463,14 @@ linear<-function(data){
   spread(key = term,value = estimate))
 ```
 
-**Join linear model and linear model**
+**Join linear model and robust model**
 
 ```{r}
 new_data<-full_join(unnest,unnest2,by=c("continent","country"))
 head(new_data,5)%>%kable()
 ```
 
-**Find interesting countries in terms large slope difference betweeen two models**
+**Find interesting countries in terms of large slope difference betweeen two models**
 
 ```{r}
 new_data<-new_data%>%

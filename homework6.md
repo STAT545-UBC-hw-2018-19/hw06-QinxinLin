@@ -535,12 +535,12 @@ index <- sample(n,n/2)
     ## # A tibble: 6 x 6
     ##   country continent  year lifeExp        pop gdpPercap
     ##   <fct>   <fct>     <int>   <dbl>      <int>     <dbl>
-    ## 1 China   Asia       2002    72.0 1280400000     3119.
-    ## 2 China   Asia       1977    64.0  943455000      741.
-    ## 3 China   Asia       1962    44.5  665770000      488.
-    ## 4 China   Asia       1997    70.4 1230075000     2289.
+    ## 1 China   Asia       1977    64.0  943455000      741.
+    ## 2 China   Asia       1962    44.5  665770000      488.
+    ## 3 China   Asia       1997    70.4 1230075000     2289.
+    ## 4 China   Asia       1957    50.5  637408000      576.
     ## 5 China   Asia       1992    68.7 1164970000     1656.
-    ## 6 China   Asia       1972    63.1  862030000      677.
+    ## 6 China   Asia       2007    73.0 1318683096     4959.
 
 ``` r
 (data_training <- data[-index,])
@@ -550,11 +550,11 @@ index <- sample(n,n/2)
     ##   country continent  year lifeExp        pop gdpPercap
     ##   <fct>   <fct>     <int>   <dbl>      <int>     <dbl>
     ## 1 China   Asia       1952    44    556263527      400.
-    ## 2 China   Asia       1957    50.5  637408000      576.
-    ## 3 China   Asia       1967    58.4  754550000      613.
+    ## 2 China   Asia       1967    58.4  754550000      613.
+    ## 3 China   Asia       1972    63.1  862030000      677.
     ## 4 China   Asia       1982    65.5 1000281000      962.
     ## 5 China   Asia       1987    67.3 1084035000     1379.
-    ## 6 China   Asia       2007    73.0 1318683096     4959.
+    ## 6 China   Asia       2002    72.0 1280400000     3119.
 
 Then I will fit a linear model to the training set and then compute mspe
 and mape on the test set.
@@ -578,7 +578,7 @@ linear_model(data_training,data_test)
 ```
 
     ## (Intercept)        year        mspe        mape 
-    ##  47.8355084   0.5119788  18.3889768   3.1767426
+    ##  48.3601767   0.5344396  19.6647235   3.2929824
 
 Next I will fit a quadratic model to the training set and then compute
 mspe and mape on the test set.
@@ -602,8 +602,8 @@ quadratic_model<-function(training,test,offset = 1952){
 quadratic_model(data_training,data_test)
 ```
 
-    ##  (Intercept)      I(year)    I(year^2)         mspe         mape 
-    ## 45.158269622  0.926783660 -0.007779491 15.335396412  2.330405543
+    ## (Intercept)     I(year)   I(year^2)        mspe        mape 
+    ## 44.60347404  1.03533328 -0.01001787 15.89111458  2.37149156
 
 Finally, I will fit a robust model to the training set and then compute
 mspe and mape on the test set.
@@ -627,7 +627,7 @@ robust_model(data_training,data_test)
 ```
 
     ## (Intercept)        year        mspe        mape 
-    ##  47.8355084   0.5119788  18.3889768   3.1767426
+    ##  48.3601767   0.5344396  19.6647235   3.2929824
 
 We can find that quadratic regression has smallest mspe and mape. Linear
 regression and robust regression have similar intercept, slope, mspe and
@@ -787,6 +787,43 @@ each country**
     ## 10 Africa    Comoros                              40.0       0.451 
     ## # ... with 132 more rows
 
+**Summary of intercept and slope parameters**
+
+``` r
+#summary
+unnest%>%
+  dplyr::select(intercept_robust,slope_robust)%>%
+  summary()
+```
+
+    ##  intercept_robust  slope_robust     
+    ##  Min.   :28.40    Min.   :-0.09302  
+    ##  1st Qu.:39.99    1st Qu.: 0.20819  
+    ##  Median :47.60    Median : 0.31499  
+    ##  Mean   :50.58    Mean   : 0.32710  
+    ##  3rd Qu.:62.44    3rd Qu.: 0.44999  
+    ##  Max.   :72.25    Max.   : 0.77795
+
+``` r
+#density plot of intercept 
+ggplot(unnest)+
+  geom_density(aes(x=intercept_robust))+
+  labs(title="density plot of intercept",
+       x = "intercept")
+```
+
+![](homework6_files/figure-gfm/unnamed-chunk-41-1.png)<!-- -->
+
+``` r
+#density plot of slope
+ggplot(unnest)+
+  geom_density(aes(x=slope_robust))+
+  labs(title="density plot of slope",
+       x = "slope")
+```
+
+![](homework6_files/figure-gfm/unnamed-chunk-41-2.png)<!-- -->
+
 **Fit a linear model of life expectancy against year**
 
 ``` r
@@ -916,7 +953,7 @@ linear<-function(data){
     ## 10 Africa    Comoros                              40.0       0.450 
     ## # ... with 132 more rows
 
-**Join linear model and linear model**
+**Join linear model and robust model**
 
 ``` r
 new_data<-full_join(unnest,unnest2,by=c("continent","country"))
@@ -931,7 +968,7 @@ head(new_data,5)%>%kable()
 | Africa    | Botswana     |          52.92912 |     0.0606685 |          52.92912 |     0.0606685 |
 | Africa    | Burkina Faso |          34.68469 |     0.3639748 |          34.68469 |     0.3639748 |
 
-**Find interesting countries in terms large slope difference betweeen
+**Find interesting countries in terms of large slope difference betweeen
 two models**
 
 ``` r
