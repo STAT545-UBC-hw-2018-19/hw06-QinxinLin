@@ -1,0 +1,466 @@
+---
+title: "Homework6"
+output: github_document
+---
+
+In this assignment, I will use the following packages.
+
+```{r}
+library(gapminder)
+library(tidyverse)
+library(knitr)
+library(MASS)
+library(broom)
+```
+
+## Overview
+
+In this homework, I will finish 3 tasks:
+
+* Character Data
+* Writing Function
+* Work with a nested data frame
+
+## Character Data
+
+### 14.2.5 Exercise
+
+**3. Use str_length() and str_sub() to extract the middle character from a string. What will you do if the string has an even number of characters?**
+
+```{r}
+x1<-"abcde" #x1 is oddd
+str_sub(x1,(str_length(x1)+1)/2,(str_length(x1)+1)/2)
+x2<-"abcdef" #x2 is even
+str_sub(x2,str_length(x2)/2,str_length(x2)/2+1)
+```
+
+**6.Write a function that turns (e.g.) a vector c("a", "b", "c") into the string a, b, and c. Think carefully about what it should do if given a vector of length 0, 1, or 2.**
+
+```{r}
+vector_turns_string<-function(x){
+   length <-length(x)
+   if(length==0){
+     stop("this is an empty vector")
+   }
+   if(length==1){
+     return(x)
+   }
+   str1<-str_c(x[1:length-1],collapse=",")
+   str2<-str_c(str1,x[length],sep=",and")
+   return(str2)
+}
+x<-c("A","B","C")
+vector_turns_string(x)
+```
+
+### 14.3.1.1 Exercise
+
+**3. What patterns will the regular expression \..\..\.. match? How would you represent it as a string?**
+
+The regular expression for this sequence is "\\..\\..\\..".
+
+```{r}
+x<-"\\..\\..\\.."
+writeLines(x)
+str_detect(x,"\\\\\\.\\.\\\\\\.\\.\\\\\\.\\.")
+```
+
+### 14.3.2.1 Exercise
+
+**2. Given the corpus of common words in stringr::words, create regular expressions that find all words that:**
+
+1. Start with “y”.
+
+```{r}
+str_subset(words,"^y")
+```
+
+2. End with “x”
+
+```{r}
+str_subset(words,"x$")
+```
+
+3. Are exactly three letters long. (Don’t cheat by using str_length()!)
+
+```{r}
+str_subset(words,"^...$")
+```
+
+4. Have seven letters or more.
+
+```{r}
+str_subset(words,"^.......") %>% head(20)
+```
+
+### 14.3.3.1 Exercise
+
+**1. Create regular expressions to find all words that:**
+
+1. Start with a vowel.
+
+```{r}
+str_subset(words,"^[aeiou]")%>%head(20)
+```
+
+2. That only contain consonants. (Hint: thinking about matching “not”-vowels.)
+
+```{r}
+str_subset(words,"^[^aeiou]+$")
+```
+
+3. End with ed, but not with eed.
+
+```{r}
+str_subset(words,"[^e]ed$")
+```
+
+4. End with ing or ise.
+
+```{r}
+str_subset(words,"ing$|ise$")
+```
+
+**5. Create a regular expression that will match telephone numbers as commonly written in your country.**
+
+```{r}
+x<-c("7789347784","774978230")
+str_detect(x,"\\d\\d\\d\\d\\d\\d\\d\\d\\d\\d")
+```
+
+### 14.3.4.1 Exercise
+
+**3. Create regular expressions to find all words that:**
+
+1. Start with three consonants.
+
+```{r}
+str_subset(words,"^[^aeiou]{3}")
+```
+
+2. Have three or more vowels in a row.
+
+```{r}
+str_subset(words,"[aeiou]{3,}")
+```
+
+3. Have two or more vowel-consonant pairs in a row.
+
+```{r}
+str_subset(words,"([aeiou][^aeiou]){2,}")%>%head(20)
+````
+
+### 14.4.2 Exercise
+
+**1. For each of the following challenges, try solving it by using both a single regular expression, and a combination of multiple str_detect() calls.**
+
+1. Find all words that start or end with x.
+
+Regular Expression
+
+```{r}
+str_subset(words,"(^x)|(x$)")
+```
+
+Using `str_detect()`
+
+```{r}
+s1<-str_detect(words, "^x")
+s2<-str_detect(words,"x$")
+s3<-words[s1|s2]
+s3
+```
+
+2. Find all words that start with a vowel and end with a consonant.
+
+Regular Expression
+
+```{r}
+str_subset(words,"^[aeiou].*[^aeiou]$")%>%head(10)
+```
+
+Using `str_detect()`
+
+```{r}
+s1<-str_detect(words, "^[aeiou]")
+s2<-str_detect(words,"[^aeiou]$")
+s3<-words[s1&s2]
+head(s3,10)
+```
+
+**2. What word has the highest number of vowels? What word has the highest proportion of vowels? (Hint: what is the denominator?)**
+
+Highest number of vowels
+
+```{r}
+str_count(words,"[aeiou]")%>%max()
+words[str_count(words,"[aeiou]")==5]
+```
+
+Highest proportion of vowels
+
+```{r}
+a<-str_count(words,"[aeiou]")
+b<-str_count(words,".")
+max(a/b)
+words[a/b==max(a/b)]
+```
+
+### 14.4.3.1 Exercise
+
+**2. From the Harvard sentences data, extract:**
+
+1. The first word from each sentence.
+
+```{r}
+noun<-"^[^ ]+"
+str_extract(sentences,noun)%>%head(10)
+```
+
+2. All words ending in ing.
+
+```{r}
+noun<-"([^ ]+)ing"
+s1<-str_subset(sentences,noun)
+str_extract(s1,noun)%>%unique
+```
+
+### 14.4.5.1 Exercise
+
+**1. Replace all forward slashes in a string with backslashes.**
+
+```{r}
+str_replace_all("A/B","/","\\\\")%>%writeLines()
+```
+
+**2. Implement a simple version of str_to_lower() using replace_all().**
+
+```{r}
+str_replace_all(sentences,".",tolower)%>%head(10)
+```
+
+### 14.4.6.1 Exercise
+
+**1. Split up a string like "apples, pears, and bananas" into individual components.**
+
+```{r}
+fruit<-"apples, pears, and bananas"
+str_split(fruit,boundary("word"))
+```
+
+**2. Why is it better to split up by boundary("word") than " "?**
+
+```{r}
+s<-"book: A, B, and C"
+str_split(s,boundary("word"))
+str_split(s," ")
+```
+
+Obviously, using boundary("word") can avoid punctuation marks but " " cannot. 
+
+### 14.5.1 Exercise
+
+**2. What are the five most common words in sentences?**
+
+```{r}
+w<-str_split(sentences,boundary("word"))%>%
+  unlist()%>%
+  str_to_lower()
+enframe(w)%>%
+  group_by(value)%>%
+  count()%>%
+  arrange(desc(n))%>%
+  head(5)
+```
+
+## Writing Functions
+
+I plan to work on a mini-data dataframe of China.
+
+```{r}
+selected_country <- "China"
+data<-gapminder%>%
+  filter(country==selected_country)
+kable(data)
+```
+
+Let's apply linear regression, quadratic regression and robust regression on China. 
+
+```{r}
+ggplot(data,aes(x=year,y=lifeExp))+
+  geom_point()+
+  geom_smooth(method = "lm", color = "red", se = FALSE)+
+  geom_smooth(method = "rlm", color = "yellow", se = FALSE)+
+  geom_smooth(method = "lm", formula = y~x+I(x^2), color = "blue", se = FALSE)+
+  labs(x = "year",
+       y = "life expectancy",
+       title = "life expectancy vs year in China")
+```
+
+Next, I will split the data into training set (half of data) and test set (other half of data). Then I will use Mean Absolute Prediction Error and Mean Squared Prediction Error as performance measure. 
+
+Now I will the data into two sets. 
+
+```{r}
+n <- nrow(data)
+index <- sample(n,n/2)
+(data_test <- data[index,])
+(data_training <- data[-index,])
+```
+
+Then I will fit a linear model to the training set and then compute mspe and mape on the test set.
+
+```{r}
+linear_model<-function(training,test,offset = 1952){
+  #fit linear model to training set
+  training$year = training$year-offset
+  linear_fit<-lm(lifeExp~year, training)
+  #predict lifeExp based on linear model 
+  test$year = test$year-offset
+  predict_value<-predict(linear_fit,test)  
+  #compute mspe and mape on the test set
+  mspe<-with(test,mean((test$lifeExp-predict_value)^2))
+  mape<-with(test,mean(abs(test$lifeExp-predict_value)))
+  intercept = coef(linear_fit)[1]
+  slope = coef(linear_fit)[2]
+  return(c(intercept,slope,"mspe" = mspe,"mape" = mape))
+}
+linear_model(data_training,data_test)
+```
+
+Next I will fit a quadratic model to the training set and then compute mspe and mape on the test set.
+
+```{r}
+quadratic_model<-function(training,test,offset = 1952){
+  #fit quadratic model to training set
+  training$year = training$year-offset
+  quadratic_fit<-lm(lifeExp~I(year)+I(year^2), training)
+  #predict lifeExp based on quadratic model 
+  test$year = test$year-offset
+  predict_value<-predict(quadratic_fit,test)  
+  #compute mspe and mape on the test set
+  mspe<-with(test,mean((test$lifeExp-predict_value)^2))
+  mape<-with(test,mean(abs(test$lifeExp-predict_value)))
+  intercept = coef(quadratic_fit)[1]
+  slope1 = coef(quadratic_fit)[2]
+  slope2 = coef(quadratic_fit)[3]
+  return(c(intercept,slope1,slope2,"mspe" = mspe,"mape" = mape))
+}
+quadratic_model(data_training,data_test)
+```
+
+Finally, I will fit a robust model to the training set and then compute mspe and mape on the test set.
+
+```{r}
+robust_model<-function(training,test,offset = 1952){
+  #fit robust model to training set
+  training$year = training$year-offset
+  robust_fit<-rlm(lifeExp~year, training)
+  #predict lifeExp based on robust model 
+  test$year = test$year-offset
+  predict_value<-predict(robust_fit,test)  
+  #compute mspe and mape on the test set
+  mspe<-with(test,mean((test$lifeExp-predict_value)^2))
+  mape<-with(test,mean(abs(test$lifeExp-predict_value)))
+  intercept = coef(robust_fit)[1]
+  slope = coef(robust_fit)[2]
+  return(c(intercept,slope,"mspe" = mspe,"mape" = mape))
+}
+robust_model(data_training,data_test)
+```
+
+We can find that quadratic regression has smallest mspe and mape. Linear regression and robust regression have similar intercept, slope, mspe and mape(sometimes the same results).
+
+## Work with a nested data frame
+
+**Nest the data by country and continent**
+
+```{r}
+(nest<-group_by(gapminder,continent,country)%>%
+  nest())
+```
+
+**Robust model of life expectancy against year**
+
+```{r}
+robust<-function(data){
+  rlm(lifeExp~I(year-1952),data)
+}
+```
+
+**Fit robust model of life expectancy against year**
+
+```{r}
+(nest<-nest%>%
+  mutate(robust_fit = map(data,robust)))
+```
+
+**Apply `tidy()` to the model for each country**
+
+```{r}
+(nest<-nest%>%
+  mutate(tidy = map(robust_fit,tidy)))
+```
+
+**Use unnest() function to display the tidy information corresponding to each country**
+
+```{r}
+(unnest<-nest%>%
+  dplyr::select(continent,country,tidy)%>%
+  unnest(tidy))
+#set names "intercept" and "slope"
+(unnest<-unnest%>%
+  mutate(term = recode(term,
+                       "(Intercept)" = "intercept_robust",
+                       "I(year - 1952)" = "slope_robust")))
+#using spread() function to reshape unnest
+(unnest<-unnest%>%
+  dplyr::select(continent:estimate)%>%
+  spread(key = term,value = estimate))
+```
+
+**Fit a linear model of life expectancy against year**
+
+```{r}
+linear<-function(data){
+  lm(lifeExp~I(year-1952),data)
+}
+(nest2<-group_by(gapminder,continent,country)%>%
+  nest())
+(nest2<-nest2%>%
+  mutate(linear_fit = map(data,linear)))
+(nest2<-nest2%>%
+  mutate(tidy = map(linear_fit,tidy)))
+(unnest2<-nest2%>%
+  dplyr::select(continent,country,tidy)%>%
+  unnest(tidy))
+(unnest2<-unnest2%>%
+  mutate(term = recode(term,
+                       "(Intercept)" = "intercept_linear",
+                       "I(year - 1952)" = "slope_linear")))
+(unnest2<-unnest2%>%
+  dplyr::select(continent:estimate)%>%
+  spread(key = term,value = estimate))
+```
+
+**Join linear model and linear model**
+
+```{r}
+new_data<-full_join(unnest,unnest2,by=c("continent","country"))
+head(new_data,5)%>%kable()
+```
+
+**Find interesting countries in terms large slope difference betweeen two models**
+
+```{r}
+new_data<-new_data%>%
+  mutate(difference=slope_robust-slope_linear)%>%
+  filter(difference > mean(difference)+2*sd(difference) | difference < mean(difference)-2*sd(difference))
+kable(new_data)
+```
+
+This table shows interesting countries which have large slope difference between linear model and robust model. 
+
+
+
+
